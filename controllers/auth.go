@@ -9,7 +9,7 @@ import (
 type RegisterInput struct {
 	Username        string `json:"username" binding:"required"`
 	Password        string `json:"password" binding:"required"`
-	ConfirmPassword string `json:confirm-password binding:"required"`
+	ConfirmPassword string `json:"confirm-password" binding:"required,eqfield=Password"`
 }
 
 func Register(c *gin.Context) {
