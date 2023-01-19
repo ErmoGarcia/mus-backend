@@ -33,29 +33,20 @@ func ConnectDataBase() {
 
 		dsn := fmt.Sprintf("host=%s user%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Madrid", DbHost, DbUser, DbPassword, DbName, DbPort)
 
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
-		if err != nil {
-			fmt.Println("Cannot connect to Postgress database.")
-			log.Fatal("connection error:", err)
-		} else {
-			fmt.Println("We are connected to the Postgress production database.")
-		}
-
-		db.AutoMigrate(&User{})
+		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	} else {
 
-		db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
-
-		if err != nil {
-			fmt.Println("Cannot connect to SQLite database.")
-			log.Fatal("connection error:", err)
-		} else {
-			fmt.Println("We are connected to the SQLite testing database.")
-		}
-
-		db.AutoMigrate(&User{})
+		DB, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 
 	}
+
+	if err != nil {
+		fmt.Println("Cannot connect to Postgress database.")
+		log.Fatal("connection error:", err)
+	} else {
+		fmt.Println("We are connected to the Postgress production database.")
+	}
+
+	DB.AutoMigrate(&User{})
 }
