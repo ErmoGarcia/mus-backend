@@ -1,26 +1,39 @@
 package main
 
 import (
-	"github.com/ErmoGarcia/mus-backend/controllers"
+	"log"
+
+	"github.com/ErmoGarcia/mus-backend/controllers/auth"
+	"github.com/ErmoGarcia/mus-backend/db"
 	"github.com/ErmoGarcia/mus-backend/middlewares"
-	"github.com/ErmoGarcia/mus-backend/models"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
-	models.ConnectDataBase()
+	var err error
+
+	err = godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	err = db.ConnectDataBase()
+	if err != nil {
+		log.Fatalf("Error loading database")
+	}
 
 	r := gin.Default()
 
 	public := r.Group("/api")
 
-	public.POST("/register", controllers.Register)
-	public.POST("/login", controllers.Login)
+	public.POST("/register", auth.Register)
+	public.POST("/login", auth.Login)
 
-	protected := r.Group("/api/admin")
+	protected := r.Group("/api/user")
 	protected.Use(middlewares.JwtAuthMiddleware())
-	protected.GET("/user", controllers.CurrentUser)
+	protected.GET("/profile", auth.CurrentUser)
 
 	r.Run(":8080")
 

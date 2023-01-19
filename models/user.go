@@ -1,13 +1,11 @@
 package models
 
 import (
-	"errors"
 	"html"
 	"strings"
 
-	"github.com/ErmoGarcia/mus-backend/utils/token"
+	"github.com/ErmoGarcia/mus-backend/utils/crypto"
 
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -17,66 +15,15 @@ type User struct {
 	Password string `gorm:"size:255;not null;" json:"password"`
 }
 
-func GetUserByID(uid uint) (User, error) {
-
-	var u User
-
-	if err := DB.First(&u, uid).Error; err != nil {
-		return u, errors.New("User not found!")
-	}
-
-	u.Password = ""
-
-	return u, nil
-
-}
-
-func LoginCheck(username string, password string) (string, error) {
-
-	var err error
-
-	u := User{}
-
-	err = DB.Model(User{}).Where("username = ?", username).Take(&u).Error
-
-	if err != nil {
-		return "", err
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return "", err
-	}
-
-	token, err := token.GenerateToken(u.ID)
-
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
-
-}
-
-func (u *User) SaveUser() (*User, error) {
-
-	var err error
-	err = DB.Create(&u).Error
-	if err != nil {
-		return &User{}, err
-	}
-	return u, nil
-}
-
-func (u *User) BeforeSave(*gorm.DB) error {
+func (u *User) BeforeCreate(*gorm.DB) error {
 
 	//turn password into hash
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	hashedPassword, err := crypto.HashPassword(u.Password)
 	if err != nil {
 		return err
 	}
-	u.Password = string(hashedPassword)
+
+	u.Password = hashedPassword
 
 	//remove spaces in username
 	u.Username = html.EscapeString(strings.TrimSpace(u.Username))
