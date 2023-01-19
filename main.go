@@ -2,10 +2,13 @@ package main
 
 import (
 	"github.com/ErmoGarcia/mus-backend/controllers"
+	"github.com/ErmoGarcia/mus-backend/models"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
+	models.ConnectDataBase()
 
 	r := gin.Default()
 
